@@ -1,0 +1,12 @@
+<div id="action-description">
+  <p>This sample demonstrates the form filling features of PDF Viewer and allows you to edit the form fields, download and print the edited form fields PDF documents..</p>
+</div>
+<div class="control-section">
+  <div class="content-wrapper">
+      <div class="flex-container">
+
+      </div>
+      <ejs-pdfviewer    [enableNavigationToolbar]="false" [enableToolbar]=false  #pdfviewer id="pdfViewer" [documentPath]='document' (validateFormFields)='validateFormFields($event)' [enableFormFieldsValidation]=true [showNotificationDialog]=false style="height:1240px;display:block;"></ejs-pdfviewer>
+  </div>
+  <button ejs-button cssClass="e-success" (click)="OnExportJson()">Submit</button>
+</div>
