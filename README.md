@@ -25,3 +25,27 @@ Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To u
 ## Further help
 
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+
+## get pdf file from .net core api
+```c#
+[HttpGet("{fileName}")]
+public IActionResult GetPdfFile(string fileName)
+{
+
+    var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "Files");
+    string filePath = Path.Combine(folderPath, fileName);
+    
+    // Check if the file exists
+    if (!System.IO.File.Exists(filePath))
+    {
+        return NotFound(); // Or return an appropriate error response
+    }
+
+    // Set the content type for the response
+    var contentType = "application/pdf";
+
+    // Return the PDF file as a FileStreamResult
+    var fileStream = System.IO.File.OpenRead(filePath);
+    return File(fileStream, contentType, fileName);
+}
+```
