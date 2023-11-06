@@ -1,12 +1,18 @@
-<div id="action-description">
-  <p>This sample demonstrates the form filling features of PDF Viewer and allows you to edit the form fields, download and print the edited form fields PDF documents..</p>
+<div id="action-description" style="text-align: center;">
+  <h1>Form filling pdf with Syncfusion</h1>
 </div>
 <div class="control-section">
   <div class="content-wrapper">
-      <div class="flex-container">
+    <ejs-pdfviewer (formFieldPropertiesChange)="formFieldPropertiesChange($event)" [enableMagnification]="false"
+      [enableNavigationToolbar]="false" [enableToolbar]="false" #pdfviewer id="pdfViewer" [documentPath]='document'
+      [enableFormFieldsValidation]=true [showNotificationDialog]="false"
+      style="height: 1200px;display:block;"></ejs-pdfviewer>
 
-      </div>
-      <ejs-pdfviewer    [enableNavigationToolbar]="false" [enableToolbar]=false  #pdfviewer id="pdfViewer" [documentPath]='document' (validateFormFields)='validateFormFields($event)' [enableFormFieldsValidation]=true [showNotificationDialog]=false style="height:1240px;display:block;"></ejs-pdfviewer>
+    <div style="text-align: center;margin:20px">
+      <button ejs-button cssClass="e-primary" (click)="onSubmit()">Submit</button>
+    </div>
+
+    <div *ngIf="showData" style="text-align: center;margin-bottom: 10px;">{{formData | json}}</div>
+
   </div>
-  <button ejs-button cssClass="e-success" (click)="OnExportJson()">Submit</button>
 </div>

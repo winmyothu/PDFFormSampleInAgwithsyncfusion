@@ -1,11 +1,6 @@
 import { Component, ViewEncapsulation, OnInit, ViewChild } from '@angular/core';
 import {
   PdfViewerComponent,
-  TextFieldSettings,
-  RadioButtonFieldSettings,
-  InitialFieldSettings,
-  CheckBoxFieldSettings,
-  SignatureFieldSettings,
   LinkAnnotationService,
   BookmarkViewService,
   MagnificationService,
@@ -17,16 +12,11 @@ import {
   PrintService,
   AnnotationService,
   FormFieldsService,
-  LoadEventArgs,
-  ValidateFormFieldsArgs,
   FormDesignerService,
   FormFieldDataFormat,
+  FormFieldPropertiesChangeArgs,
 } from '@syncfusion/ej2-angular-pdfviewer';
-import { ClickEventArgs } from '@syncfusion/ej2-buttons';
 
-/**
- * Default PdfViewer Controller
- */
 @Component({
   selector: 'app-form-filling',
   templateUrl: 'form-filling.component.html',
@@ -51,33 +41,45 @@ import { ClickEventArgs } from '@syncfusion/ej2-buttons';
 export class FormFillingComponent implements OnInit {
   @ViewChild('pdfviewer')
   public pdfviewerControl!: PdfViewerComponent;
-  // @ViewChild('switch')
-  // public switch!: SwitchComponent;
 
-  exportedData: any;
+  public serviceUrl!: string;
+  public documentPath!: string;
 
-  // public document: string =
-  //   'https://cdn.syncfusion.com/content/pdf/form-filling-document.pdf';
+  formData: any;
+  showData: boolean = false;
 
-     document: string ='form-filling-document.pdf';
+
+  document: string = 'https://cdn.syncfusion.com/content/pdf/form-filling-document.pdf';
+  //document: string ='https://localhost:7163/WeatherForecast/form-filling-document.pdf';
+
   ngOnInit(): void {
     // ngOnInit function
   }
 
-  ngAfterViewInit(){
-    // this.pdfviewerControl.setting
-    // var container = document.querySelector('#pdfViewer_pageViewContainer');
-    var pdf = this.pdfviewerControl;
+  ngAfterViewInit() {}
 
+  formFieldPropertiesChange(e: FormFieldPropertiesChangeArgs): void {
+    this.showData = false;
+    var formField = this.pdfviewerControl.retrieveFormFields();
+    let txtName = e.field.name;
+    if (txtName == 'numOne' || txtName == 'numTwo') {
+      let numOne = formField[9].value;
+      let numTwo = formField[10].value;
 
+      formField[11].value = String(Number(numOne) + Number(numTwo));
+
+      this.pdfviewerControl.updateFormFieldsValue(formField[11]);
+    }
   }
-  public validateFormFields(e: ValidateFormFieldsArgs): void {
-    console.log(e);
+
+  public validateFormFields() {
+    let valid: boolean = false;
     let errorMessage: string = 'Required Field(s): ';
     let forms: any = this.pdfviewerControl.formFieldCollections;
     let flag: boolean = false;
     let radioGroupName: string = '';
     for (var i = 0; i < forms.length; i++) {
+      debugger;
       let text: string = '';
       if (forms[i].isRequired == true) {
         if (
@@ -110,64 +112,26 @@ export class FormFillingComponent implements OnInit {
     }
     if (errorMessage != 'Required Field(s): ') {
       this.pdfviewerControl.showNotificationPopup(errorMessage);
+      this.showData = false;
+    } else {
+      valid = true;
+      this.showData = true;
     }
+    return valid;
   }
 
-  OnExportJson() {
+  onSubmit() {
+    this.formData = {};
     //var viewer = (<any>document.getElementById('pdfViewer')).ej2_instances[0];
-    var viewer = this.pdfviewerControl;
-    debugger;
-    viewer
-      .exportFormFieldsAsObject(FormFieldDataFormat.Json)
-      .then((data: any) => {
-        console.log(data)
-        let formData = JSON.parse(data);
-        alert(formData.name)
-      });
-  }
-
-  submit() {
-    debugger;
-    let errorMessage: string = 'Required Field(s): ';
-    let forms: any = this.pdfviewerControl.formFieldCollections;
-    console.log(forms);
-    let flag: boolean = false;
-    let formData: any = [];
-    let radioGroupName: string = '';
-    for (var i = 0; i < forms.length; i++) {
-      formData.push(`${forms[i].name}:${forms[i].value}`);
-      let text: string = '';
-      if (forms[i].isRequired == false) {
-        if (
-          forms[i].type.toString() == 'Checkbox' &&
-          forms[i].isChecked == false
-        ) {
-          text = forms[i].name;
-        } else if (forms[i].type == 'RadioButton' && flag == false) {
-          radioGroupName = forms[i].name;
-          if (forms[i].isSelected == true) flag = true;
-        } else if (
-          forms[i].type.toString() != 'Checkbox' &&
-          forms[i].type != 'RadioButton' &&
-          forms[i].value == ''
-        ) {
-          text = forms[i].name;
-        }
-        if (text != '') {
-          if (errorMessage == 'Required Field(s): ') {
-            errorMessage += text;
-          } else {
-            errorMessage += ', ' + text;
-          }
-        }
-      }
-    }
-    if (!flag && radioGroupName != '') {
-      if (errorMessage == 'Required Field(s): ') errorMessage += radioGroupName;
-      else errorMessage += ', ' + radioGroupName;
-    }
-    if (errorMessage != 'Required Field(s): ') {
-      this.pdfviewerControl.showNotificationPopup(errorMessage);
+    let valid = this.validateFormFields();
+    if (valid) {
+      var viewer = this.pdfviewerControl;
+      viewer
+        .exportFormFieldsAsObject(FormFieldDataFormat.Json)
+        .then((data: any) => {
+          console.log(data);
+          this.formData = JSON.parse(data);
+        });
     }
   }
 }
